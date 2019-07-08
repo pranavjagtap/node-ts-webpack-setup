@@ -1,15 +1,16 @@
 const path = require('path');
+const webpack = require('webpack');
 const nodeExternals = require('webpack-node-externals');
-
-const {
-  NODE_ENV = 'production',
-} = process.env;
+const NodemonPlugin = require('nodemon-webpack-plugin');
 
 module.exports = {
   entry: './src/index.ts',
-  mode: NODE_ENV,
+  node: {
+    __dirname: false,
+  },
+  mode: 'development',
   target: 'node',
-  watch: NODE_ENV === 'development',
+  name: 'server',
   externals: [nodeExternals()],
   output: {
     path: path.resolve(__dirname, 'build'),
@@ -18,15 +19,21 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.js'],
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: `'development'`
+      }
+    }),
+    new NodemonPlugin()
+  ],
   module: {
     rules: [
       {
-        test: /\.ts$/,
-        use: [
-          'ts-loader'
-        ]
-      }
-    ]
+        test: /\.ts(x?)$/,
+        use: 'ts-loader',
+        exclude: /node_modules/
+      }    ]
   }
 }
 
